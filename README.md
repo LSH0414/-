@@ -135,16 +135,31 @@ docs = [
 
 vectorstore = Chroma.from_documents(docs, embedding) # 시간걸림
 
-# 제목 텍스트와 가장 유사한 상위 5개 기사 가져오기
+# 기사별 상위 5개 기사와 점수(유사도) 저장
 reco_dics = {id : {'docs' : [], 'scores' : []} for id in view_log['articleID'].unique()}
-for article_id in tqdm(view_log['articleID'].unique()):
+for article_id in tqdm(view_log['articleID'].unique(), total = len(view_log['articleID'].unique())):
     title = article_info[article_info['articleID'] == article_id]['Title'].iloc[0]
-    for relevance_data in vectorstore.similarity_search_with_relevance_scores(title, k =5): # title과 유사한 상위 5개 제목 데이터 가져오는 부분
+    for relevance_data in vectorstore.similarity_search_with_relevance_scores(title, k =5):
         doc, score = relevance_data
         if  article_id != doc.metadata['id']:
             
             reco_dics[article_id]['docs'].append(doc.metadata['id'])
             reco_dics[article_id]['scores'].append(score)
+
+
+# 유저가 봤던 기사들의 목록의 연관성 높은 기사와 점수를 가져와 합산후, 유저별 상위 5개 추천 항목 생성
+person_reco_dics = {id : [] for id in view_log['userID'].unique()}
+for user_id in tqdm(view_log['userID'].unique(), total = len(view_log['userID'].unique())):
+    
+    view_articles = view_log[view_log['userID'] == user_id]['articleID'].values
+    
+    reco_list_dict = defaultdict(int)
+    for article_id in view_articles:
+        for doc, score in zip(reco_dics[article_id]['docs'], reco_dics[article_id]['scores']):
+            reco_list_dict[doc] += score
+
+    # 상위 5개 목록만 각 유저 아이디에 추가
+    person_reco_dics[user_id] = sorted(reco_list_dict, key=lambda x: x[1], reverse=True)[:5]
 ~~~
 
 
