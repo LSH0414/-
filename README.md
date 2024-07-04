@@ -108,7 +108,7 @@ view_log_with_lang = view_log_with_lang.drop(index=drop_idx)
 - 결론적으로 제목 텍스트만으로 계산한 임베딩 값들로는 추천목록을 만들기는 부족했다. 하지만 동일한 로직을 사용한 타 참가자의 경우 이 로직을 size가 작은 임베딩 모델을 활용해 본문까지 활용하였고 이를 통해 좀 더 좋은 결과를 얻었음.
 ~~~python
 # Embedding 모델 활용을 위해 sentence-transformers 설치, Vectorstore를 쉽게 핸들링하기 위해 langchain, langchain_community 사용
-# pip install sentence-transformers langchain langchain_community 
+# pip install sentence-transformers langchain langchain_community chroma
 
 
 def embed_file(CACHE_DIR, model_name = 'BAAI/bge-m3'):
